@@ -5,8 +5,7 @@
 			var $audio = $(this);
 			
 			//Обертка и контролы
-			var $audio_wrap = $('<div></div>').addClass('audio_box');
-			//<form><input class="audio_seek" type="range" min="0" max="200" value="0" step="1" name="foo"> <output class="hint_range" onforminput="value = foo.valueAsNumber;"></output></form>
+			var $audio_wrap = $('<div></div>').addClass('audio_box');//<form><input class="audio_seek" type="range" min="0" max="200" value="0" step="1" name="foo"> <output class="hint_range" onforminput="value = foo.valueAsNumber;"></output></form>
 			var $audio_controls = $('<div class="audio_controls"><button class="play_pause_btn"></button><button class="hide_btn">Прослушать</button> <form><input class="audio_seek" type="range" min="0" max="200" value="0" step="1"> <output class="audio_hint_range"></output></form></div>');
 			$audio.wrap($audio_wrap);
 			$audio.after($audio_controls);
@@ -78,6 +77,8 @@
 			
 			//Обработчик кнопки "Воспроизвести"
 			function playSound() {
+				change();
+				
 				$hide_btn.css('disabled', 'disabled').css('z-index', '1').css('opacity', '0.8')
 							.css('-moz-opacity', '0.8').css('filter', 'alpha(opacity=80)');
 				$audio[0].play();
@@ -90,7 +91,9 @@
 			
 			//Обработчик кнопки play/pause
 			function playPause() {
-				if($audio[0].paused){
+				if($audio[0].paused){	
+					change();
+					
 					$audio[0].play();
 					$play_btn.css('background', 'url(images/pause.png)');
 				}
@@ -103,7 +106,7 @@
 			//Прокрутка музыки слайдером
 			function audioSeek() {
 				var seekto = $audio[0].duration * ($audio_seek.val() / seekMaxVal);
-				$audio[0].currentTime = seekto;				
+				$audio[0].currentTime = seekto;
 			}
 			
 			//Позиционирование ползунка(прогресс)
@@ -143,7 +146,18 @@
 				$hint_range.css('left', pos + 'px');
 				$hint_range.css('marginLeft', offset + '%');
 				$hint_range.text(Time);
-			}		
+			}
+
+			function change() {
+			//Остановка воспроизведения предыдущего трека при переключении на другой
+				//-=-
+				$audio.addClass('stoped').removeClass('playing');
+				$(this).removeClass('stoped').addClass('playing');
+				$('.stoped').each(function() {
+					$(this).trigger('pause');
+				})
+				//-=-
+			}
 			
 			function showHint() {
 				$hint_range.css('opacity', '1').css('-moz-opacity', '1').css('filter', 'alpha(opacity=100)');
@@ -155,7 +169,7 @@
 			//Пауза воспроизведения(в данном случае, когда муз. кончается, кнопка из паузы становится плеем)
 			$audio.bind('pause', function() {
 				$play_btn.css('background', 'url(images/play.png)');
-			});				
+			});	
 		});
 	};
 })(jQuery);
